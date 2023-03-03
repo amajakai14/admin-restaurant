@@ -1,4 +1,4 @@
-import { PrismaClient, User } from "@prisma/client";
+import { type PrismaClient, type User } from "@prisma/client";
 import { z } from "zod";
 import { generateRandomPassword, hashPassword } from "../../../utils/password";
 

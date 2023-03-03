@@ -23,6 +23,7 @@ const server = z.object({
   S3_SECRET_KEY: z.string(),
   S3_BUCKET: z.string(),
   CRON_SECRET: z.string(),
+  CLOUDFRONT_URL: z.string().url(),
 });
 
 /**
@@ -48,6 +49,7 @@ const processEnv = {
   S3_SECRET_KEY: process.env.S3_SECRET_KEY,
   S3_BUCKET: process.env.S3_BUCKET,
   CRON_SECRET: process.env.CRON_SECRET,
+  CLOUDFRONT_URL: process.env.CLOUDFRONT_URL,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
