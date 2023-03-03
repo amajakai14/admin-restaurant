@@ -60,3 +60,14 @@ export function addMenuImageURLService(menus: Menu[]): MenuWithUrl[] {
     };
   });
 }
+
+export async function getMenuService(
+  prisma: PrismaClient,
+  corporation_id: string
+): Promise<Menu[]> {
+  return await prisma.menu.findMany({
+    where: {
+      corporation_id,
+    },
+  });
+}

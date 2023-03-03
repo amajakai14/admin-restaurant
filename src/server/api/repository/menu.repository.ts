@@ -5,6 +5,7 @@ import { type createMenuSchema, type uploadImageSchema } from "../routers/menu";
 import {
   addMenuImageURLService,
   addMenuService,
+  getMenuService as getMenusService,
   setMenuHasImageService,
   uploadMenuImageService,
 } from "../service/menu.service";
@@ -16,6 +17,8 @@ export const uploadMenuImage: UploadMenuImage = uploadMenuImageService;
 export const setMenuHasImage: SetMenuHasImage = setMenuHasImageService;
 
 export const addImageUrl: AddImageUrl = addMenuImageURLService;
+
+export const getMenus: GetMenus = getMenusService;
 
 interface AddMenu {
   (
@@ -35,6 +38,10 @@ interface SetMenuHasImage {
 
 interface AddImageUrl {
   (menus: Menu[]): MenuWithUrl[];
+}
+
+interface GetMenus {
+  (prisma: PrismaClient, corporation_id: string): Promise<Menu[]>;
 }
 
 export type CreateMenuInput = z.TypeOf<typeof createMenuSchema>;

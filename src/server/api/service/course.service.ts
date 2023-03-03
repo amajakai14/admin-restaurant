@@ -1,5 +1,8 @@
-import { Course, PrismaClient } from "@prisma/client";
-import { CreateCourseInput } from "../repository/course.repository";
+import { Course, CourseOnMenu, PrismaClient } from "@prisma/client";
+import {
+  CoursesOnMenus,
+  CreateCourseInput,
+} from "../repository/course.repository";
 
 export function todoCourse() {
   return;
@@ -30,5 +33,49 @@ export async function createCourseService(
       course_timelimit,
       Corporation: { connect: { id: corporation_id } },
     },
+  });
+}
+
+export async function getCourseAndMenuRelationsService(
+  prisma: PrismaClient,
+  corporation_id: string
+): Promise<CourseOnMenu[]> {
+  return await prisma.courseOnMenu.findMany({
+    where: {
+      corporation_id,
+    },
+  });
+}
+
+type CourseOnMenuInput = {
+  course_id: number;
+  menu_id: number;
+  corporation_id: string;
+};
+
+export async function updateAllCourseAndMenuRelationsService(
+  prisma: PrismaClient,
+  input: CoursesOnMenus,
+  corporation_id: string
+): Promise<void> {
+  let courseAndMenuRelations: CourseOnMenuInput[] | undefined = undefined;
+  if (input) {
+    courseAndMenuRelations = input.map((props) => ({
+      ...props,
+      corporation_id,
+    }));
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.courseOnMenu.deleteMany({
+      where: {
+        corporation_id,
+      },
+    });
+    if (courseAndMenuRelations) {
+      await tx.courseOnMenu.createMany({
+        data: courseAndMenuRelations,
+      });
+    }
   });
 }
