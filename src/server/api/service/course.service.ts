@@ -1,7 +1,11 @@
-import { Course, CourseOnMenu, PrismaClient } from "@prisma/client";
 import {
-  CoursesOnMenus,
-  CreateCourseInput,
+  type Course,
+  type CourseOnMenu,
+  type PrismaClient,
+} from "@prisma/client";
+import {
+  type CoursesOnMenus,
+  type CreateCourseInput,
 } from "../repository/course.repository";
 
 export function todoCourse() {

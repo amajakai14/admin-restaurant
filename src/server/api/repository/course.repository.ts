@@ -1,7 +1,11 @@
-import { CourseOnMenu, type Course, type PrismaClient } from "@prisma/client";
+import {
+  type Course,
+  type CourseOnMenu,
+  type PrismaClient,
+} from "@prisma/client";
 import { type z } from "zod";
 import {
-  coursesOnMenusSchema,
+  type coursesOnMenusSchema,
   type createCourseSchema,
 } from "../routers/course";
 import {

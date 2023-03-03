@@ -23,11 +23,10 @@ export const menuRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createMenuSchema)
     .mutation(async ({ ctx, input }) => {
-      const { price } = input;
       const { corporation_id } = ctx.session.user;
       if (!corporation_id) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-      if (!isValidPrice(price)) {
+      if (!isValidPrice(input.price)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "price should be a number",
@@ -47,9 +46,30 @@ export const menuRouter = createTRPCRouter({
       if (!corporation_id) throw new TRPCError({ code: "UNAUTHORIZED" });
       const { id } = input;
 
-      await repository.setMenuHasImage(ctx.prisma, id);
+      const setMenuHasImagePromise = repository.setMenuHasImage(ctx.prisma, id);
+      const uploadMenuImagePromise = repository.uploadMenuImage(
+        corporation_id,
+        id
+      );
 
-      return await repository.uploadMenuImage(corporation_id, id);
+      const [setMenuHasImage, uploadMenuImage] = await Promise.allSettled([
+        setMenuHasImagePromise,
+        uploadMenuImagePromise,
+      ]);
+
+      if (
+        setMenuHasImage.status === "rejected" ||
+        uploadMenuImage.status === "rejected"
+      ) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to upload image",
+        });
+      }
+
+      return {
+        result: uploadMenuImage,
+      };
     }),
 
   get: protectedProcedure.query(async ({ ctx }) => {
