@@ -70,8 +70,8 @@ export const channelRouter = createTRPCRouter({
         where: { id: channel_id },
         data: { id: channel_id, status },
       });
+
       return {
-        status: 201,
         result,
       };
     }),
@@ -84,6 +84,7 @@ export const channelRouter = createTRPCRouter({
         ctx.prisma,
         table_id
       );
+
       return {
         result: channels,
       };
@@ -94,12 +95,14 @@ export const channelRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { channel_id } = input;
       const channel = await repository.getChannel(ctx.prisma, channel_id);
+
       if (!channel) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Channel not found",
         });
       }
+
       return {
         result: channel,
       };
