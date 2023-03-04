@@ -11,9 +11,12 @@ import {
 import {
   createCourseService,
   getCourseAndMenuRelationsService,
+  getCourseService,
   getCoursesService,
   updateAllCourseAndMenuRelationsService,
 } from "../service/course.service";
+
+export const getCourse: GetCourse = getCourseService;
 
 export const getCourses: GetCourses = getCoursesService;
 
@@ -24,6 +27,10 @@ export const getCourseAndMenuRelations: GetCourseAndMenuRelations =
 
 export const updateAllCourseAndMenuRelations: UpdateAllCourseAndMenuRelations =
   updateAllCourseAndMenuRelationsService;
+
+interface GetCourse {
+  (prisma: PrismaClient, course_id: number): Promise<Course | null>;
+}
 
 interface GetCourses {
   (prisma: PrismaClient, corporation_id: string): Promise<Course[]>;

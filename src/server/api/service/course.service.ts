@@ -8,8 +8,11 @@ import {
   type CreateCourseInput,
 } from "../repository/course.repository";
 
-export function todoCourse() {
-  return;
+export async function getCourseService(
+  prisma: PrismaClient,
+  course_id: number
+): Promise<Course | null> {
+  return await prisma.course.findUnique({ where: { id: course_id } });
 }
 
 export async function getCoursesService(
