@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { isValidEmail, isValidPassword } from "../utils/input-validation";
+import { isValidEmail, isValidPassword } from "../utils/input.validation";
 
-import type { CreateUserInput } from "../schema/user.schema";
+import type { CreateUserInput } from "../server/api/routers/user";
 import { api } from "../utils/api";
 import LoadingButton from "./LoadingButton";
 
@@ -11,10 +12,11 @@ const RegisterForm = () => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  const mutation = api.user.register.useMutation({
+  const mutation = api.user.registerAdmin.useMutation({
     onError: (e) => setErrorMessage(e.message),
     onSuccess: () => router.push("/"),
   });
+
   const {
     register,
     handleSubmit,

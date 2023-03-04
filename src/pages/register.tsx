@@ -1,7 +1,7 @@
 import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Layout from "../components/Layout";
-import RegisterForm from "../components/Registerform";
+import RegisterForm from "../components/RegisterForm";
 
 import { getServerAuthSession } from "../server/auth";
 
