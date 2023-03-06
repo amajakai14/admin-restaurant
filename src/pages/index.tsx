@@ -18,6 +18,7 @@ const Home: NextPage = () => {
   let availableMenu: TNavbar;
   const session = useSession();
   if (session.status === "loading") return <div>Loading...</div>;
+  console.log("role", session.data?.user.role);
 
   switch (session.data?.user.role) {
     case "ADMIN":

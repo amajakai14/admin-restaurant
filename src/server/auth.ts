@@ -7,6 +7,7 @@ import {
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "~/server/db";
+import { comparePassword } from "../utils/password";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -39,12 +40,23 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-        session.user.role = user.role ?? undefined;
-        session.user.corporation_id = user.corporation_id ?? undefined;
+    jwt: ({ user, token }) => {
+      if (user?.corporation_id) {
+        token.corporation_id = user.corporation_id;
+        token.role = user.role;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      console.log("session", session, "token", token);
+      if (session.user && token.sub && token.role && token.corporation_id) {
+        session.user.id = token.sub;
+        session.user.role = token.role;
+        session.user.corporation_id = token.corporation_id;
       }
       return session;
     },
@@ -62,14 +74,30 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const user = await prisma.user.findUnique({
-          where: { email: credentials?.username },
-        });
-        if (user) {
-          return user;
-        } else {
+        const email = credentials?.username;
+        const password = credentials?.password;
+        if (!email || !password) {
           return null;
         }
+
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (!user || !user.password) {
+          return null;
+        }
+
+        const validatePassword = await comparePassword(
+          password,
+          user?.password
+        );
+
+        if (!validatePassword) {
+          return null;
+        }
+
+        return user;
       },
     }),
   ],
@@ -86,3 +114,10 @@ export const getServerAuthSession = (ctx: {
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    role?: string | null;
+    corporation_id?: string | null;
+  }
+}
