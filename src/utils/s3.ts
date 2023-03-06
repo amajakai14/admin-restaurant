@@ -26,6 +26,5 @@ export const putObjectPresignedUrl = async (
     Expires: 30,
   });
   s3Client.destroy();
-  console.log(url);
   return url;
 };

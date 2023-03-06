@@ -81,17 +81,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email: email.toLowerCase() },
         });
 
         if (!user || !user.password) {
           return null;
         }
 
-        const validatePassword = await comparePassword(
-          password,
-          user?.password
-        );
+        const validatePassword = await comparePassword(password, user.password);
 
         if (!validatePassword) {
           return null;
