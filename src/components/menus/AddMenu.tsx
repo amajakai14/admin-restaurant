@@ -1,4 +1,3 @@
-import { PresignedPost } from "@aws-sdk/s3-presigned-post";
 import Image from "next/image";
 import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
@@ -7,11 +6,12 @@ import Pagination from "react-paginate";
 import {
   CreateMenuInput,
   MenuWithUrl,
-  UploadImageInput,
 } from "../../server/api/repository/menu.repository";
 import { api } from "../../utils/api";
 import { isValidPrice } from "../../utils/input.validation";
 import LoadingButton from "../LoadingButton";
+
+const menuType = ["APPETIZER", "MAIN", "DESSERT", "DRINK"] as const;
 
 const AddMenu: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -33,7 +33,6 @@ const AddMenu: React.FC = () => {
 
   const {
     register,
-    handleSubmit,
     formState: { errors },
     setValue,
   } = useForm<CreateMenuInput>();
@@ -56,30 +55,38 @@ const AddMenu: React.FC = () => {
       return;
     }
 
-    const result = await uploadImage(file, presigned);
+    // const result = await uploadImage(file, presigned);
+    const result = await uploadImage();
     if (!result) setErrorMessage("unable to upload image");
 
     setIsLoading(false);
-    await fetchMenu.refetch();
+    // await fetchMenu.refetch();
+  };
+  const uploadImage = async () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(true);
+      }, 1000);
+    });
   };
 
-  const uploadImage = async (file: File, presignedUri: PresignedPost) => {
-    const { url, fields } = presignedUri;
-    const data = {
-      ...fields,
-      "Content-type": file.type,
-      file,
-    };
-    const formData = new FormData();
-    for (const name in data) {
-      formData.append(name, data[name]);
-    }
-    const result = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
-    return result.ok;
-  };
+  // const uploadImage = async (file: File, presignedUri: PresignedPost) => {
+  //   const { url, fields } = presignedUri;
+  //   const data = {
+  //     ...fields,
+  //     "Content-type": file.type,
+  //     file,
+  //   };
+  //   const formData = new FormData();
+  //   for (const name in data) {
+  //     formData.append(name, data[name]);
+  //   }
+  //   const result = await fetch(url, {
+  //     method: "POST",
+  //     body: formData,
+  //   });
+  //   return result.ok;
+  // };
 
   const onFileChange = (e: React.FormEvent<HTMLInputElement>) => {
     const file: File | undefined = e.currentTarget.files?.[0];
@@ -123,7 +130,10 @@ const AddMenu: React.FC = () => {
   return (
     <div className="w-full py-3">
       <div className="flex flex-col items-center border py-3">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
+        <form
+          onSubmit={() => onSubmit}
+          className="flex flex-col gap-2"
+        >
           {errorMessage && (
             <p className="text-center text-red-600">{errorMessage}</p>
           )}
@@ -159,44 +169,14 @@ const AddMenu: React.FC = () => {
             defaultValue={0}
             {...register("price", { required: false, valueAsNumber: true })}
           />
-          <div>
-            {mutation.isLoading || isLoading ? (
-              <div></div>
-            ) : (
-              <>
-                <input
-                  accept="image/*"
-                  onChange={(e: React.FormEvent<HTMLInputElement>) =>
-                    onFileChange(e)
-                  }
-                  //when cancel button is clicked, the file input will not trigger onChange event
-                  //so we need to set the value to false
-                  onClick={() => {
-                    reset();
-                  }}
-                  type="file"
-                />
-              </>
-            )}
-            {preview && (
-              <Image
-                src={preview}
-                alt="preview image"
-                width={100}
-                height={100}
-                id="preview"
-                className="h-32 w-40"
-              />
-            )}
-          </div>
-          {mutation.isLoading || isLoading ? (
+          {mutation.isLoading ? (
             <LoadingButton />
           ) : (
             <input type="submit" className="rounded border py-1 px-4" />
           )}
         </form>
+        {menus && <MenuTable page={page} menus={menus} setPage={setPage} />}
       </div>
-      {menus && <MenuTable page={page} menus={menus} setPage={setPage} />}
     </div>
   );
 };
@@ -272,104 +252,104 @@ const MenuTable = ({
   );
 };
 
-const AddImage = ({ id }: { id: number }) => {
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [file, setFile] = useState<File | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
-  const { handleSubmit } = useForm<UploadImageInput>();
-  function validateFile(file: File) {
-    if (file.size > 5e10) return false;
-    return true;
-  }
+// const AddImage = ({ id }: { id: number }) => {
+//   const [errorMessage, setErrorMessage] = useState<string | undefined>();
+//   const [file, setFile] = useState<File | undefined>(undefined);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const { handleSubmit } = useForm<UploadImageInput>();
+//   function validateFile(file: File) {
+//     if (file.size > 5e10) return false;
+//     return true;
+//   }
 
-  function reset() {
-    setErrorMessage(undefined);
-    setFile(undefined);
-    setIsLoading(false);
-  }
+//   function reset() {
+//     setErrorMessage(undefined);
+//     setFile(undefined);
+//     setIsLoading(false);
+//   }
 
-  const mutation = api.menu.uploadImage.useMutation({
-    onError: (e) => setErrorMessage(e.message),
-    onSuccess: () => {
-      setErrorMessage(undefined);
-      reset();
-    },
-  });
+//   const mutation = api.menu.uploadImage.useMutation({
+//     onError: (e) => setErrorMessage(e.message),
+//     onSuccess: () => {
+//       setErrorMessage(undefined);
+//       reset();
+//     },
+//   });
 
-  const onSubmit: SubmitHandler<UploadImageInput> = async () => {
-    setIsLoading(true);
-    setErrorMessage(undefined);
-    if (!file) {
-      setErrorMessage("no file selected");
-      setIsLoading(false);
-      return;
-    }
-    const presigned = await mutation.mutateAsync({ id });
-    const result = await uploadImage(file, presigned);
-    if (!result) setErrorMessage("unable to upload image");
-    setIsLoading(false);
-  };
-  const onFileChange = (e: React.FormEvent<HTMLInputElement>) => {
-    const file: File | undefined = e.currentTarget.files?.[0];
-    if (!file) {
-      reset();
-      return;
-    }
-    if (!validateFile(file)) {
-      reset();
-      setErrorMessage("upload file cannot be over then 5 MB.");
-      return;
-    }
-    const fileExtension = file.name.split(".").pop();
-    if (!fileExtension) {
-      reset();
-      setErrorMessage("file extension not found");
-      return;
-    }
-    setErrorMessage(undefined);
+//   const onSubmit: SubmitHandler<UploadImageInput> = async () => {
+//     setIsLoading(true);
+//     setErrorMessage(undefined);
+//     if (!file) {
+//       setErrorMessage("no file selected");
+//       setIsLoading(false);
+//       return;
+//     }
+//     const presigned = await mutation.mutateAsync({ id });
+//     const result = await uploadImage(file, presigned);
+//     if (!result) setErrorMessage("unable to upload image");
+//     setIsLoading(false);
+//   };
+//   const onFileChange = (e: React.FormEvent<HTMLInputElement>) => {
+//     const file: File | undefined = e.currentTarget.files?.[0];
+//     if (!file) {
+//       reset();
+//       return;
+//     }
+//     if (!validateFile(file)) {
+//       reset();
+//       setErrorMessage("upload file cannot be over then 5 MB.");
+//       return;
+//     }
+//     const fileExtension = file.name.split(".").pop();
+//     if (!fileExtension) {
+//       reset();
+//       setErrorMessage("file extension not found");
+//       return;
+//     }
+//     setErrorMessage(undefined);
 
-    setFile(file);
-  };
-  return (
-    <div className="flex flex-col justify-center">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-          <label htmlFor={`file-upload-id${id}`}>
-            <input
-              id={`file-upload-id${id}`}
-              accept="image/jpeg, image/png"
-              className="
-              text-grey-500 text-sm
-            file:mr-5 file:rounded-full file:border-0
-            file:bg-blue-50 file:py-2
-            file:px-6 file:text-sm
-            file:font-medium file:text-blue-700
-            hover:file:cursor-pointer hover:file:bg-amber-50
-            hover:file:text-amber-700
-              "
-              onChange={(e: React.FormEvent<HTMLInputElement>) =>
-                onFileChange(e)
-              }
-              onClick={(e) => {
-                e.currentTarget.value = "";
-                reset();
-              }}
-              type="file"
-            />
-          </label>
-          <div className="pt-2 text-start">
-            {mutation.isLoading || isLoading ? (
-              <LoadingButton />
-            ) : (
-              <input
-                type="submit"
-                className="mr-5 rounded-full border py-2 px-6 text-sm hover:cursor-pointer hover:bg-slate-100 active:bg-slate-200"
-              />
-            )}
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-};
+//     setFile(file);
+//   };
+//   return (
+//     <div className="flex flex-col justify-center">
+//       <form onSubmit={handleSubmit(onSubmit)}>
+//         <div>
+//           {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+//           <label htmlFor={`file-upload-id${id}`}>
+//             <input
+//               id={`file-upload-id${id}`}
+//               accept="image/jpeg, image/png"
+//               className="
+//               text-grey-500 text-sm
+//             file:mr-5 file:rounded-full file:border-0
+//             file:bg-blue-50 file:py-2
+//             file:px-6 file:text-sm
+//             file:font-medium file:text-blue-700
+//             hover:file:cursor-pointer hover:file:bg-amber-50
+//             hover:file:text-amber-700
+//               "
+//               onChange={(e: React.FormEvent<HTMLInputElement>) =>
+//                 onFileChange(e)
+//               }
+//               onClick={(e) => {
+//                 e.currentTarget.value = "";
+//                 reset();
+//               }}
+//               type="file"
+//             />
+//           </label>
+//           <div className="pt-2 text-start">
+//             {mutation.isLoading || isLoading ? (
+//               <LoadingButton />
+//             ) : (
+//               <input
+//                 type="submit"
+//                 className="mr-5 rounded-full border py-2 px-6 text-sm hover:cursor-pointer hover:bg-slate-100 active:bg-slate-200"
+//               />
+//             )}
+//           </div>
+//         </div>
+//       </form>
+//     </div>
+//   );
+// };

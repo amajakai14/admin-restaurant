@@ -7,7 +7,7 @@ import {
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "~/server/db";
-import { comparePassword } from "../utils/password";
+import { comparePassword } from "~/utils/password";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const validatePassword = await comparePassword(password, user.password);
+        const validatePassword = comparePassword(password, user.password);
 
         if (!validatePassword) {
           return null;

@@ -1,3 +1,4 @@
+import fs from "fs";
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -87,3 +88,10 @@ const AddMenuAndCourse = () => {
     </>
   );
 };
+
+export function getStaticProps() {
+  fs;
+  return {
+    props: {},
+  };
+}

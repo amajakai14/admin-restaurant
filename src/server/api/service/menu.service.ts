@@ -71,3 +71,14 @@ export async function getMenuService(
     },
   });
 }
+
+export async function getMenusService(
+  prisma: PrismaClient,
+  corporation_id: string
+): Promise<Menu[]> {
+  return await prisma.menu.findMany({
+    where: {
+      corporation_id,
+    },
+  });
+}

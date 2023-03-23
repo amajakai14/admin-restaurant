@@ -5,7 +5,7 @@ import { type createMenuSchema, type uploadImageSchema } from "../routers/menu";
 import {
   addMenuImageURLService,
   addMenuService,
-  getMenuService as getMenusService,
+  getMenusService,
   setMenuHasImageService,
   uploadMenuImageService,
 } from "../service/menu.service";
