@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import type { TNavbar } from "../../components/Navbar";
 import Navbar from "../../components/Navbar";
 import StaffList from "../../components/staff/StaffList";
-import StaffRegisterForm from "../../components/staff/StaffRegisterform";
+import RegisterForm from "../../components/staff/RegisterForm";
 import { api } from "../../utils/api";
 
 export type TStaff = {
@@ -52,7 +52,6 @@ const Staff = () => {
     if (status == "unauthenticated") {
       router.push("/admin");
     }
-    fetchData.refetch();
   }, [sessionData, status, refetchStaff, router, fetchData]);
   if (status === "loading" || fetchData.status === "loading") {
     return <p className="text-2xl text-white">Loading...</p>;
@@ -64,7 +63,7 @@ const Staff = () => {
   staffList = fetchData.data?.result;
   return (
     <>
-      <StaffRegisterForm
+      <RegisterForm
         refetchStaff={refetchStaff}
         setRefetchStaff={setRefetchStaff}
       />

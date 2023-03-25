@@ -10,9 +10,8 @@ export const createMenuSchema = z.object({
   menu_name_en: z.string(),
   menu_name_th: z.string(),
   menu_type: z.enum(menuType),
-  price: z.number().positive(),
+  price: z.number(),
   hasImage: z.boolean(),
-  priority: z.number().nullable(),
 });
 
 export const uploadImageSchema = z.object({
@@ -23,6 +22,7 @@ export const menuRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createMenuSchema)
     .mutation(async ({ ctx, input }) => {
+		console.log("create get called")
       const { corporation_id } = ctx.session.user;
       if (!corporation_id) throw new TRPCError({ code: "UNAUTHORIZED" });
 

@@ -17,7 +17,7 @@ export const createStaffSchema = z.object({
 
 export type CreateUserInput = z.TypeOf<typeof createUserSchema>;
 
-export type CreateStaffInput = z.TypeOf<typeof createUserSchema>;
+export type CreateStaffInput = z.TypeOf<typeof createStaffSchema>;
 
 export const userRouter = createTRPCRouter({
   registerAdmin: publicProcedure
@@ -89,8 +89,6 @@ export const userRouter = createTRPCRouter({
         corporation_id
       );
       return {
-        status: 201,
-        message: "Staff Account created Successfully",
         result: staff,
       };
     }),

@@ -57,7 +57,7 @@ export async function createStaffUserService(
   prisma: PrismaClient,
   mail_address: string,
   corporation_id: string
-): Promise<Omit<User, "password">> {
+): Promise<User> {
   const password = generateRandomPassword();
   const hash = await hashPassword("Password123");
   await prisma.user.create({
